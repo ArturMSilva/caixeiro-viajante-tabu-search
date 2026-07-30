@@ -305,12 +305,13 @@ GIF e o *slider* da interface Streamlit.
 - **[Streamlit](https://streamlit.io/)** — interface interativa no navegador.
 
 Nenhuma biblioteca de otimização (OR-Tools, PuLP, etc.) foi utilizada: **todo o
-algoritmo é implementado manualmente**, como exige o trabalho.
+algoritmo é implementado manualmente**, coerente com a proposta do trabalho, que é
+implementar a estratégia algorítmica — e não apenas chamar um solver pronto.
 
 ### 3.7 Estrutura do projeto e detalhes de implementação
 
 ```
-tsp-busca-tabu/
+caixeiro-viajante-tabu-search/
 ├── README.md            # este documento
 ├── requirements.txt     # dependências
 ├── main.py              # script de linha de comando: roda o experimento e gera as imagens/GIF
@@ -366,8 +367,8 @@ de plotagem atende às duas saídas.
 
 ```bash
 # 1. clone o repositório
-git clone https://github.com/ArturMSilva/tsp-busca-tabu.git
-cd tsp-busca-tabu
+git clone https://github.com/ArturMSilva/caixeiro-viajante-tabu-search.git
+cd caixeiro-viajante-tabu-search
 
 # 2. (recomendado) crie um ambiente virtual
 python -m venv .venv
@@ -395,7 +396,8 @@ Saída no terminal:
 Cidades............: 25
 Iterações..........: 300
 Tamanho lista tabu.: 15
-Seed...............: 42
+Seed (instância)...: 42
+Seed (rota inicial): 42
 --------------------------------------------------------------
 Distância inicial (rota aleatória).: 1322.00
 Melhor distância encontrada........: 468.08
@@ -412,8 +414,15 @@ Os parâmetros podem ser alterados por linha de comando:
 python main.py --cidades 40 --iteracoes 500 --tabu 20 --seed 7
 python main.py --sem-gif            # execução mais rápida, sem gerar o GIF
 python main.py --passo-gif 10       # GIF mais leve (1 frame a cada 10 iterações)
+python main.py --seed-rota 99       # mesmas cidades, outra rota inicial
 python main.py --help               # lista todas as opções
 ```
+
+**Sobre as duas sementes.** `--seed` controla o sorteio das **cidades** (a instância) e,
+por padrão, também a **rota inicial**. `--seed-rota` separa as duas coisas: informando-a,
+a instância continua idêntica e apenas o ponto de partida da busca muda. É exatamente o
+que a seção 4.6 mede — sem essa separação, trocar a semente mudaria o mapa junto e as
+distâncias não seriam comparáveis entre si.
 
 #### Opção B — Interface interativa (Streamlit)
 
@@ -538,15 +547,20 @@ rota inicial aleatória fica proporcionalmente muito pior à medida que *n* cres
 
 ### 4.6 Robustez em relação à solução inicial
 
-Mesma instância de 25 cidades, variando apenas a seed da rota inicial:
+Mesma instância de 25 cidades (`--seed 42`, mapa fixo), variando apenas a semente da
+rota inicial. Cada linha é reproduzível com:
 
-| Seed | Melhor distância |
-|---|---|
-| 1 | 430,94 |
-| 7 | 451,96 |
-| 42 | 468,08 |
-| 99 | **395,38** |
-| 2024 | 418,66 |
+```bash
+python main.py --sem-gif --seed 42 --seed-rota <valor da coluna>
+```
+
+| `--seed-rota` | Distância inicial | Melhor distância |
+|---|---|---|
+| 1 | 1141,44 | 430,94 |
+| 7 | 1234,34 | 451,96 |
+| 42 (padrão) | 1322,00 | 468,08 |
+| 99 | 1117,24 | **395,38** |
+| 2024 | 1112,92 | 418,66 |
 
 Média 433,00; mínimo 395,38; máximo 468,08 — uma dispersão de cerca de **18%** entre o
 melhor e o pior resultado. Esse é o retrato honesto de uma metaheurística: o resultado
@@ -587,8 +601,10 @@ prova de sub-otimalidade (descruzar sempre encurta a rota, pela desigualdade tri
 A causa é a estrutura de vizinhança escolhida: o *swap* troca duas cidades de posição,
 mas não é o movimento natural para descruzar arestas. O movimento **2-opt** — que
 inverte um segmento inteiro da rota — remove cruzamentos diretamente e é reconhecidamente
-superior ao *swap* para o TSP. O *swap* foi mantido por ser o exigido no escopo do
-trabalho e por ser mais simples de explicar e de visualizar.
+superior ao *swap* para o TSP. O *swap* foi mantido por **escolha didática**: é a
+vizinhança mais simples de explicar, de implementar e de acompanhar quadro a quadro no
+GIF, o que atende melhor ao objetivo deste trabalho — demonstrar o mecanismo da Busca
+Tabu. A troca pelo 2-opt fica registrada como trabalho futuro (seção 5.3).
 
 ### 5.2 Dificuldades encontradas
 
