@@ -26,9 +26,6 @@ import matplotlib.pyplot as plt  # noqa: E402  (import após definir o backend)
 import imageio.v2 as imageio  # noqa: E402
 
 
-# ---------------------------------------------------------------------------
-# 1. Plot de uma rota sobre o mapa de cidades
-# ---------------------------------------------------------------------------
 def plot_rota(cidades, rota, distancia, titulo="Rota", caminho_arquivo=None,
               limites=None):
     """Desenha as cidades (pontos) e a rota (linhas na ordem de visita).
@@ -58,16 +55,15 @@ def plot_rota(cidades, rota, distancia, titulo="Rota", caminho_arquivo=None,
     -------
     matplotlib.figure.Figure | None
     """
-    # Coordenadas na ordem da rota, com a primeira cidade repetida no fim.
+    # Coordenadas na ordem da rota, com a primeira cidade repetida no fim para
+    # que o segmento de retorno (o fechamento do ciclo) também seja desenhado.
     ordem = list(rota) + [rota[0]]
     xs = cidades[ordem, 0]
     ys = cidades[ordem, 1]
 
     fig, ax = plt.subplots(figsize=(6, 6))
 
-    # Arestas do ciclo.
     ax.plot(xs, ys, "-", color="#1f77b4", linewidth=1.4, zorder=1)
-    # Cidades.
     ax.plot(cidades[:, 0], cidades[:, 1], "o", color="#d62728",
             markersize=6, zorder=2)
 
@@ -102,9 +98,6 @@ def plot_rota(cidades, rota, distancia, titulo="Rota", caminho_arquivo=None,
     return None
 
 
-# ---------------------------------------------------------------------------
-# 2. Curva de convergência
-# ---------------------------------------------------------------------------
 def plot_convergencia(historico, caminho_arquivo=None):
     """Plota a evolução da distância ao longo das iterações.
 
@@ -152,9 +145,6 @@ def plot_convergencia(historico, caminho_arquivo=None):
     return None
 
 
-# ---------------------------------------------------------------------------
-# 3. Animação (GIF) da evolução da busca
-# ---------------------------------------------------------------------------
 def gerar_gif(cidades, historico, caminho_gif="evolucao.gif", passo=5,
               duracao_frame=0.18, pasta_frames="frames_temp"):
     """Gera um GIF mostrando a rota evoluindo ao longo das iterações.
@@ -196,7 +186,8 @@ def gerar_gif(cidades, historico, caminho_gif="evolucao.gif", passo=5,
     limites = (x_min - folga_x, x_max + folga_x,
                y_min - folga_y, y_max + folga_y)
 
-    # Seleção dos frames: de `passo` em `passo`, garantindo o último registro.
+    # Seleção dos frames: de `passo` em `passo`, garantindo o último registro
+    # para que o GIF termine no estado final da busca.
     indices = list(range(0, len(historico), max(1, passo)))
     if indices[-1] != len(historico) - 1:
         indices.append(len(historico) - 1)

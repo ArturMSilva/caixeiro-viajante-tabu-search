@@ -45,10 +45,9 @@ def parse_argumentos():
     parser.add_argument("--seed", type=int, default=SEED,
                         help=f"semente da instância, ou seja, do sorteio das "
                              f"cidades (padrão: {SEED})")
-    # Separar as duas sementes permite fixar a instância e variar apenas o
-    # ponto de partida da busca — é assim que a seção 4.6 do README mede a
-    # sensibilidade da metaheurística à solução inicial. Se não for informada,
-    # cai no valor de --seed (comportamento padrão de antes).
+    # Separar as duas sementes permite fixar a instância e variar apenas o ponto
+    # de partida da busca — é assim que a seção 4.6 do README mede a
+    # sensibilidade da metaheurística à solução inicial.
     parser.add_argument("--seed-rota", type=int, default=None,
                         help="semente da rota inicial (padrão: mesma de "
                              "--seed); use para manter as mesmas cidades e "
@@ -76,11 +75,9 @@ def main():
     print(f"Seed (rota inicial): {seed_rota}")
     print("-" * 62)
 
-    # --- 1 e 2. Instância do problema -------------------------------------
     cidades = gerar_cidades(args.cidades, seed=args.seed)
     dist = matriz_distancias(cidades)
 
-    # --- 3. Execução da metaheurística ------------------------------------
     inicio = time.perf_counter()
     melhor_rota, melhor_distancia, historico = busca_tabu(
         cidades,
@@ -96,7 +93,6 @@ def main():
     distancia_inicial = historico[0]["distancia"]
     melhoria = 100.0 * (distancia_inicial - melhor_distancia) / distancia_inicial
 
-    # --- 4. Resultados numéricos ------------------------------------------
     print(f"Distância inicial (rota aleatória).: {distancia_inicial:.2f}")
     print(f"Melhor distância encontrada........: {melhor_distancia:.2f}")
     print(f"Melhoria...........................: {melhoria:.2f}%")
@@ -104,7 +100,6 @@ def main():
     print(f"Melhor rota........................: {melhor_rota}")
     print("-" * 62)
 
-    # --- 5. Saídas visuais -------------------------------------------------
     plot_rota(cidades, rota_inicial_gerada, distancia_inicial,
               titulo="Rota inicial (aleatória)",
               caminho_arquivo="rota_inicial.png")

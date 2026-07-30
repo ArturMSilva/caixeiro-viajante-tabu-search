@@ -25,9 +25,6 @@ import streamlit as st
 from tsp import busca_tabu, gerar_cidades, matriz_distancias
 from visualizacao import plot_convergencia, plot_rota
 
-# ---------------------------------------------------------------------------
-# Configuração da página
-# ---------------------------------------------------------------------------
 st.set_page_config(page_title="TSP com Busca Tabu", page_icon="🗺️",
                    layout="wide")
 
@@ -37,9 +34,6 @@ st.caption(
     "Otimização Combinatória (IFPI, Campus Picos)"
 )
 
-# ---------------------------------------------------------------------------
-# Barra lateral: parâmetros do experimento
-# ---------------------------------------------------------------------------
 with st.sidebar:
     st.header("⚙️ Parâmetros")
 
@@ -73,12 +67,9 @@ with st.sidebar:
         "- Vizinhança: troca (*swap*) de pares de posições da rota."
     )
 
-# ---------------------------------------------------------------------------
-# Execução da busca
-# ---------------------------------------------------------------------------
 # `st.session_state` preserva o resultado entre as interações do usuário. Sem
-# isso, cada movimento do slider dispararia um rerun do script e a busca seria
-# executada novamente do zero.
+# isso, cada movimento do slider dispararia um rerun do script e a busca tabu
+# seria executada novamente do zero.
 if rodar:
     with st.spinner("Executando a Busca Tabu..."):
         cidades = gerar_cidades(int(n_cidades), seed=int(seed))
@@ -117,9 +108,6 @@ melhor_rota = resultado["melhor_rota"]
 melhor_distancia = resultado["melhor_distancia"]
 distancia_inicial = historico[0]["distancia"]
 
-# ---------------------------------------------------------------------------
-# Métricas principais
-# ---------------------------------------------------------------------------
 melhoria = 100.0 * (distancia_inicial - melhor_distancia) / distancia_inicial
 
 col1, col2, col3 = st.columns(3)
@@ -131,9 +119,6 @@ col3.metric("Melhoria", f"{melhoria:.2f}%")
 
 st.markdown("---")
 
-# ---------------------------------------------------------------------------
-# Navegação pelas iterações + plot da rota
-# ---------------------------------------------------------------------------
 esquerda, direita = st.columns([1, 1])
 
 with esquerda:
@@ -150,8 +135,8 @@ with esquerda:
     # iteração (começando na 0), posição == número da iteração.
     registro = historico[iteracao_escolhida]
 
-    # Limites fixos dos eixos: evita que o gráfico mude de escala ao arrastar
-    # o slider, o que dificultaria comparar visualmente as rotas.
+    # Limites fixos dos eixos: evita que o gráfico mude de escala ao arrastar o
+    # slider, o que dificultaria comparar visualmente as rotas.
     margem = 0.05
     x_min, x_max = cidades[:, 0].min(), cidades[:, 0].max()
     y_min, y_max = cidades[:, 1].min(), cidades[:, 1].max()
@@ -183,17 +168,11 @@ with direita:
     )
     st.pyplot(fig_melhor, clear_figure=True)
 
-# ---------------------------------------------------------------------------
-# Convergência
-# ---------------------------------------------------------------------------
 st.markdown("---")
 st.subheader("Convergência")
 fig_conv = plot_convergencia(historico, caminho_arquivo=None)
 st.pyplot(fig_conv, clear_figure=True)
 
-# ---------------------------------------------------------------------------
-# Detalhes da execução
-# ---------------------------------------------------------------------------
 with st.expander("🔍 Detalhes da execução"):
     st.write("**Parâmetros usados:**", resultado["parametros"])
     st.write("**Melhor rota (ordem de visita):**")

@@ -24,9 +24,6 @@ from collections import deque
 import numpy as np
 
 
-# ---------------------------------------------------------------------------
-# 1. Dados do problema (instância)
-# ---------------------------------------------------------------------------
 def gerar_cidades(n, seed=42, largura=100.0, altura=100.0):
     """Gera uma instância aleatória do TSP com `n` cidades no plano.
 
@@ -54,7 +51,6 @@ def gerar_cidades(n, seed=42, largura=100.0, altura=100.0):
     # porque não interfere no estado aleatório do resto do programa.
     rng = np.random.default_rng(seed)
 
-    # `uniform` sorteia coordenadas contínuas; empilhamos x e y em duas colunas.
     xs = rng.uniform(0.0, largura, size=n)
     ys = rng.uniform(0.0, altura, size=n)
     return np.column_stack((xs, ys))
@@ -82,9 +78,6 @@ def matriz_distancias(cidades):
     return np.sqrt((diferencas ** 2).sum(axis=2))
 
 
-# ---------------------------------------------------------------------------
-# 2. Função objetivo
-# ---------------------------------------------------------------------------
 def distancia_total(rota, dist):
     """Função objetivo: comprimento total do ciclo definido por `rota`.
 
@@ -112,13 +105,11 @@ def distancia_total(rota, dist):
         Distância total do ciclo fechado.
     """
     origens = np.asarray(rota, dtype=int)
+    # O "próximo" do último elemento passa a ser o primeiro: o ciclo fecha sozinho.
     destinos = np.roll(origens, -1)
     return float(dist[origens, destinos].sum())
 
 
-# ---------------------------------------------------------------------------
-# 3. Solução inicial
-# ---------------------------------------------------------------------------
 def rota_inicial(n_cidades, seed=42):
     """Gera uma solução inicial aleatória (permutação das cidades).
 
@@ -134,13 +125,10 @@ def rota_inicial(n_cidades, seed=42):
     """
     rng = np.random.default_rng(seed)
     rota = np.arange(n_cidades)
-    rng.shuffle(rota)  # embaralha in-place
+    rng.shuffle(rota)
     return rota.tolist()
 
 
-# ---------------------------------------------------------------------------
-# 4. Estrutura de vizinhança
-# ---------------------------------------------------------------------------
 def vizinhos_swap(rota):
     """Gera a vizinhança da rota atual por TROCA (swap) de pares de posições.
 
@@ -167,7 +155,8 @@ def vizinhos_swap(rota):
     n = len(rota)
     vizinhanca = []
 
-    # i < j evita gerar o mesmo vizinho duas vezes (swap é simétrico).
+    # i < j evita gerar o mesmo vizinho duas vezes (o swap é simétrico) e faz
+    # com que (i, j) e (j, i) sejam UM único movimento aos olhos da lista tabu.
     for i in range(n - 1):
         for j in range(i + 1, n):
             vizinho = rota.copy()
@@ -177,9 +166,6 @@ def vizinhos_swap(rota):
     return vizinhanca
 
 
-# ---------------------------------------------------------------------------
-# 5. Metaheurística: Busca Tabu
-# ---------------------------------------------------------------------------
 def busca_tabu(cidades, dist, iteracoes=300, tamanho_tabu=15, seed=42):
     """Executa a Busca Tabu para o TSP.
 
@@ -245,7 +231,7 @@ def busca_tabu(cidades, dist, iteracoes=300, tamanho_tabu=15, seed=42):
     """
     n = len(cidades)
 
-    # --- Solução inicial ---------------------------------------------------
+    # --- Solução inicial ---
     rota_atual = rota_inicial(n, seed=seed)
     distancia_atual = distancia_total(rota_atual, dist)
 
@@ -253,14 +239,14 @@ def busca_tabu(cidades, dist, iteracoes=300, tamanho_tabu=15, seed=42):
     melhor_rota = rota_atual.copy()
     melhor_distancia = distancia_atual
 
-    # --- Lista tabu --------------------------------------------------------
-    # deque com `maxlen`: ao inserir o (tamanho_tabu + 1)-ésimo movimento, o
-    # mais antigo é descartado automaticamente. É exatamente a semântica de
-    # uma memória de curto prazo com tenure fixa (FIFO).
+    # --- Lista tabu ---
+    # deque com `maxlen`: ao inserir o (tamanho_tabu + 1)-ésimo movimento, o mais
+    # antigo é descartado automaticamente. É exatamente a semântica de uma memória
+    # de curto prazo com tenure fixa (FIFO), sem código de expiração manual.
     lista_tabu = deque(maxlen=tamanho_tabu)
 
-    # Histórico começa com o estado inicial (iteração 0), útil para mostrar
-    # "de onde a busca partiu" nos gráficos e no GIF.
+    # O histórico começa com o estado inicial (iteração 0), que alimenta os
+    # gráficos, o GIF e o slider da interface.
     historico = [{
         "iteracao": 0,
         "rota": rota_atual.copy(),
@@ -281,22 +267,22 @@ def busca_tabu(cidades, dist, iteracoes=300, tamanho_tabu=15, seed=42):
             d_vizinho = distancia_total(vizinho, dist)
 
             eh_tabu = movimento in lista_tabu
-            # Critério de aspiração: mesmo proibido, o movimento é liberado
-            # se levar a uma solução melhor que a melhor global conhecida.
+            # Critério de aspiração: mesmo proibido, o movimento é liberado se
+            # levar a uma solução melhor que a melhor global conhecida — seria
+            # absurdo recusar a melhor solução já vista por causa do tabu.
             aspiracao = d_vizinho < melhor_distancia
 
             if eh_tabu and not aspiracao:
-                continue  # movimento proibido e sem mérito -> descartado
+                continue  # proibido e sem mérito -> descartado
 
             if d_vizinho < melhor_vizinho_distancia:
                 melhor_vizinho = vizinho
                 melhor_vizinho_distancia = d_vizinho
                 melhor_movimento = movimento
 
-        # Caso extremo: todos os vizinhos estavam proibidos (acontece quando a
-        # vizinhança é pequena e a lista tabu é grande). Sem candidato, apenas
-        # registramos a iteração e seguimos — a lista tabu vai esvaziando com
-        # o tempo e a busca volta a ter opções.
+        # Caso extremo: todos os vizinhos estavam proibidos (acontece com
+        # vizinhança pequena e lista tabu grande). Sem candidato, registramos a
+        # iteração e seguimos — a lista tabu esvazia e a busca volta a ter opções.
         if melhor_vizinho is None:
             historico.append({
                 "iteracao": it,
@@ -306,16 +292,17 @@ def busca_tabu(cidades, dist, iteracoes=300, tamanho_tabu=15, seed=42):
             })
             continue
 
-        # 3) Movimento efetivo: aceitamos o melhor vizinho admissível MESMO
-        #    que ele seja pior que a solução atual (estratégia de escape).
+        # 3) Movimento efetivo: aceitamos o melhor vizinho admissível MESMO que
+        #    ele seja pior que a solução atual. É esta linha que dá à busca tabu
+        #    o poder de escapar de ótimos locais.
         rota_atual = melhor_vizinho
         distancia_atual = melhor_vizinho_distancia
 
-        # 4) Registrar o movimento como tabu pelas próximas `tamanho_tabu`
-        #    iterações, impedindo que a troca seja desfeita imediatamente.
+        # 4) O movimento fica proibido pelas próximas `tamanho_tabu` iterações,
+        #    impedindo que a troca recém-feita seja desfeita em seguida.
         lista_tabu.append(melhor_movimento)
 
-        # 5) Atualizar a melhor solução global (memória de longo prazo simples).
+        # 5) Atualizar a melhor solução global, se houve melhora.
         if distancia_atual < melhor_distancia:
             melhor_rota = rota_atual.copy()
             melhor_distancia = distancia_atual
