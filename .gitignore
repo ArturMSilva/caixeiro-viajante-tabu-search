@@ -15,7 +15,7 @@ frames_temp/
 .streamlit/secrets.toml
 
 # --- Arquivo de apoio (não faz parte da entrega) ---
-prompt-claude-code-tsp.md
+docs/
 
 # --- Editores / SO ---
 .vscode/
@@ -24,7 +24,6 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
-# OBSERVAÇÃO: as saídas visuais de exemplo (rota_inicial.png, rota_final.png,
-# convergencia.png e evolucao.gif) são versionadas de propósito, para que o
-# README exiba os resultados direto no GitHub sem exigir que o leitor execute
-# o projeto.
+# OBSERVAÇÃO: as saídas visuais de exemplo (pasta imagens/) são versionadas de
+# propósito, para que o README exiba os resultados direto no GitHub sem exigir
+# que o leitor execute o projeto.

@@ -4,7 +4,7 @@ Implementação em Python da metaheurística **Busca Tabu (Tabu Search)** aplica
 **Problema do Caixeiro Viajante (PCV / TSP)**, com saídas visuais estáticas (PNG),
 animação da evolução da busca (GIF) e uma interface interativa em Streamlit.
 
-![Evolução da busca](evolucao.gif)
+![Evolução da busca](imagens/evolucao.gif)
 
 ---
 
@@ -312,17 +312,24 @@ implementar a estratégia algorítmica — e não apenas chamar um solver pronto
 
 ```
 caixeiro-viajante-tabu-search/
-├── README.md            # este documento
-├── requirements.txt     # dependências
-├── main.py              # script de linha de comando: roda o experimento e gera as imagens/GIF
-├── tsp.py               # LÓGICA: modelagem do TSP + metaheurística Busca Tabu
-├── visualizacao.py      # VISUALIZAÇÃO estática: plots PNG e animação GIF
-├── interface.py         # VISUALIZAÇÃO interativa: aplicação Streamlit
-├── rota_inicial.png     # (gerado) rota inicial aleatória
-├── rota_final.png       # (gerado) melhor rota encontrada
-├── convergencia.png     # (gerado) distância x iteração
-└── evolucao.gif         # (gerado) animação da evolução da busca
+├── README.md                # este documento
+├── requirements.txt         # dependências
+├── main.py                  # script de linha de comando: roda o experimento e gera as imagens/GIF
+├── tsp.py                   # LÓGICA: modelagem do TSP + metaheurística Busca Tabu
+├── visualizacao.py          # VISUALIZAÇÃO estática: plots PNG e animação GIF
+├── interface.py             # VISUALIZAÇÃO interativa: aplicação Streamlit
+├── imagens/                 # saídas visuais geradas pelo main.py
+│   ├── rota_inicial.png     # (gerado) rota inicial aleatória
+│   ├── rota_final.png       # (gerado) melhor rota encontrada
+│   ├── convergencia.png     # (gerado) distância x iteração
+│   └── evolucao.gif         # (gerado) animação da evolução da busca
+└── docs/                    # material de apoio (enunciado do trabalho)
 ```
+
+Os quatro módulos Python ficam na raiz de propósito: são poucos, cada um com um papel
+bem definido, e os dois pontos de entrada (`main.py` e `interface.py`) rodam sem nenhum
+ajuste de `PYTHONPATH`. As pastas separam o que **não** é código-fonte: as saídas geradas
+(`imagens/`) e o material de apoio (`docs/`).
 
 **Separação de responsabilidades.** A decisão de arquitetura mais importante do projeto é
 que **`tsp.py` não importa nada de visualização** — não conhece matplotlib, imageio nem
@@ -405,8 +412,8 @@ Melhoria...........................: 64.59%
 Tempo de execução..................: 1.27 s
 ```
 
-E os arquivos gerados: `rota_inicial.png`, `rota_final.png`, `convergencia.png`,
-`evolucao.gif`.
+E os arquivos gerados na pasta `imagens/`: `rota_inicial.png`, `rota_final.png`,
+`convergencia.png` e `evolucao.gif` (a pasta é criada automaticamente se não existir).
 
 Os parâmetros podem ser alterados por linha de comando:
 
@@ -445,11 +452,11 @@ O navegador abre em `http://localhost:8501` com:
 
 #### Como embutir o GIF no README
 
-Depois de rodar `python main.py`, o arquivo `evolucao.gif` fica na raiz do projeto.
-Basta referenciá-lo em Markdown (é o que este README faz, logo abaixo do título):
+Depois de rodar `python main.py`, o arquivo `evolucao.gif` fica em `imagens/`. Basta
+referenciá-lo em Markdown (é o que este README faz, logo abaixo do título):
 
 ```markdown
-![Evolução da busca](evolucao.gif)
+![Evolução da busca](imagens/evolucao.gif)
 ```
 
 Como o `.gitignore` **não** ignora as imagens geradas, elas são versionadas junto com o
@@ -476,11 +483,11 @@ inicial avaliando **90 mil** soluções, de um espaço de busca com cerca de
 
 | Rota inicial (aleatória) | Melhor rota encontrada |
 |---|---|
-| ![Rota inicial](rota_inicial.png) | ![Rota final](rota_final.png) |
+| ![Rota inicial](imagens/rota_inicial.png) | ![Rota final](imagens/rota_final.png) |
 
 ### 4.2 Análise de convergência
 
-![Convergência](convergencia.png)
+![Convergência](imagens/convergencia.png)
 
 O gráfico de convergência é o resultado mais informativo do trabalho, porque mostra o
 **mecanismo** da Busca Tabu em funcionamento:
@@ -595,7 +602,7 @@ Os experimentos deixaram três lições claras:
    que o valor padrão adotado (15) não foi o melhor encontrado; ele foi mantido porque o
    objetivo era demonstrar o algoritmo, não fazer *tuning* fino de parâmetros.
 
-Também é honesto apontar as **limitações**. Ao inspecionar a `rota_final.png` de perto,
+Também é honesto apontar as **limitações**. Ao inspecionar a `imagens/rota_final.png` de perto,
 ainda se observam **cruzamentos de arestas** — e em um TSP euclidiano, cruzamento é
 prova de sub-otimalidade (descruzar sempre encurta a rota, pela desigualdade triangular).
 A causa é a estrutura de vizinhança escolhida: o *swap* troca duas cidades de posição,

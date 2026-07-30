@@ -9,7 +9,8 @@ Fluxo:
     2. Pré-calcula a matriz de distâncias.
     3. Roda a Busca Tabu com parâmetros padrão razoáveis.
     4. Imprime distância inicial x melhor distância encontrada.
-    5. Gera os arquivos visuais: rota_final.png, convergencia.png, evolucao.gif.
+    5. Gera os arquivos visuais em imagens/: rota_inicial.png, rota_final.png,
+       convergencia.png e evolucao.gif.
 
 Uso:
     python main.py
@@ -18,6 +19,7 @@ Uso:
 """
 
 import argparse
+import os
 import time
 
 from tsp import busca_tabu, gerar_cidades, matriz_distancias
@@ -29,6 +31,9 @@ ITERACOES = 300
 TAMANHO_TABU = 15
 SEED = 42
 PASSO_GIF = 5  # 1 frame a cada 5 iterações
+
+# Todas as saídas visuais ficam reunidas nesta pasta, para não poluir a raiz.
+PASTA_SAIDA = "imagens"
 
 
 def parse_argumentos():
@@ -100,23 +105,29 @@ def main():
     print(f"Melhor rota........................: {melhor_rota}")
     print("-" * 62)
 
+    os.makedirs(PASTA_SAIDA, exist_ok=True)
+
+    caminho_inicial = os.path.join(PASTA_SAIDA, "rota_inicial.png")
     plot_rota(cidades, rota_inicial_gerada, distancia_inicial,
               titulo="Rota inicial (aleatória)",
-              caminho_arquivo="rota_inicial.png")
-    print("Gerado: rota_inicial.png")
+              caminho_arquivo=caminho_inicial)
+    print(f"Gerado: {caminho_inicial}")
 
+    caminho_final = os.path.join(PASTA_SAIDA, "rota_final.png")
     plot_rota(cidades, melhor_rota, melhor_distancia,
               titulo="Melhor rota encontrada (Busca Tabu)",
-              caminho_arquivo="rota_final.png")
-    print("Gerado: rota_final.png")
+              caminho_arquivo=caminho_final)
+    print(f"Gerado: {caminho_final}")
 
-    plot_convergencia(historico, caminho_arquivo="convergencia.png")
-    print("Gerado: convergencia.png")
+    caminho_convergencia = os.path.join(PASTA_SAIDA, "convergencia.png")
+    plot_convergencia(historico, caminho_arquivo=caminho_convergencia)
+    print(f"Gerado: {caminho_convergencia}")
 
     if not args.sem_gif:
-        gerar_gif(cidades, historico, caminho_gif="evolucao.gif",
+        caminho_gif = os.path.join(PASTA_SAIDA, "evolucao.gif")
+        gerar_gif(cidades, historico, caminho_gif=caminho_gif,
                   passo=args.passo_gif)
-        print("Gerado: evolucao.gif")
+        print(f"Gerado: {caminho_gif}")
 
     print("=" * 62)
     print("Dica: para explorar a busca interativamente, rode:")
