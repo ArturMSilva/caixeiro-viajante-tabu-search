@@ -14,6 +14,7 @@ Fluxo:
 Uso:
     python main.py
     python main.py --cidades 40 --iteracoes 500 --tabu 20 --seed 7
+    python main.py --seed 42 --seed-rota 99   # mesma instância, outra rota inicial
 """
 
 import argparse
@@ -42,7 +43,16 @@ def parse_argumentos():
     parser.add_argument("--tabu", type=int, default=TAMANHO_TABU,
                         help=f"tamanho da lista tabu (padrão: {TAMANHO_TABU})")
     parser.add_argument("--seed", type=int, default=SEED,
-                        help=f"semente aleatória (padrão: {SEED})")
+                        help=f"semente da instância, ou seja, do sorteio das "
+                             f"cidades (padrão: {SEED})")
+    # Separar as duas sementes permite fixar a instância e variar apenas o
+    # ponto de partida da busca — é assim que a seção 4.6 do README mede a
+    # sensibilidade da metaheurística à solução inicial. Se não for informada,
+    # cai no valor de --seed (comportamento padrão de antes).
+    parser.add_argument("--seed-rota", type=int, default=None,
+                        help="semente da rota inicial (padrão: mesma de "
+                             "--seed); use para manter as mesmas cidades e "
+                             "trocar só o ponto de partida da busca")
     parser.add_argument("--passo-gif", type=int, default=PASSO_GIF,
                         help=f"iterações por frame do GIF (padrão: {PASSO_GIF})")
     parser.add_argument("--sem-gif", action="store_true",
@@ -53,13 +63,17 @@ def parse_argumentos():
 def main():
     args = parse_argumentos()
 
+    # --seed-rota omitido => usa a mesma semente da instância.
+    seed_rota = args.seed if args.seed_rota is None else args.seed_rota
+
     print("=" * 62)
     print(" TSP com Busca Tabu — Otimização Combinatória (IFPI Picos)")
     print("=" * 62)
     print(f"Cidades............: {args.cidades}")
     print(f"Iterações..........: {args.iteracoes}")
     print(f"Tamanho lista tabu.: {args.tabu}")
-    print(f"Seed...............: {args.seed}")
+    print(f"Seed (instância)...: {args.seed}")
+    print(f"Seed (rota inicial): {seed_rota}")
     print("-" * 62)
 
     # --- 1 e 2. Instância do problema -------------------------------------
@@ -73,7 +87,7 @@ def main():
         dist,
         iteracoes=args.iteracoes,
         tamanho_tabu=args.tabu,
-        seed=args.seed,
+        seed=seed_rota,
     )
     tempo = time.perf_counter() - inicio
 
